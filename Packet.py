@@ -130,4 +130,3 @@ class Packet:
 		"""Builds a packet type"""
 		if cmd in self.commands:
 			self.packet = {"command": cmd}
-

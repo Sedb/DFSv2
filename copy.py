@@ -92,18 +92,19 @@ def copyToDFS(address, fname, path):
 	blocks = []
 	f.seek(0)
 
-	# for i, nodeInfo in enumerate(dnservers):
-	# 	blockContents = f.read(blocksize)
-	# 	if i == len(dnservers)-1:
-	# 		blockContents+=f.read(extra)
-	# 		blocksize+=extra
-
-	# 	sp.BuildPutPacket(fname, blocksize)
-
-	for nodes in dnservers:
-		sp.BuildPutPacket(fname, blocksize)
+	for i, nodeInfo in enumerate(dnservers):
+		blockContents = f.read(blocksize)
+		if i == len(dnservers)-1:
+			blockContents+=f.read(extra)
+			blocksize+=extra
+		sp.BuildPutPacket(fname,fsize)
 		request = communications(sp.getEncodedPacket(), nodes[0], nodes[1])
 		blocks.append((nodes[0], str(nodes[1]), request))
+
+	# for nodes in dnservers:
+	# 	sp.BuildPutPacket(fname, blocksize)
+	# 	request = communications(sp.getEncodedPacket(), nodes[0], nodes[1])
+	# 	blocks.append((nodes[0], str(nodes[1]), request))
 
 
 	# Notify the metadata server where the blocks are saved.
