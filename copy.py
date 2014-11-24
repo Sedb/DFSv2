@@ -92,31 +92,27 @@ def copyToDFS(address, fname, path):
 	blocks = []
 	f.seek(0)
 
-	for i, nodeInfo in enumerate(dnservers):
-		blockContents = f.read(blocksize)
-		if i == len(dnservers)-1:
-			blockContents+=f.read(extra)
-			blocksize+=extra
+	# for i, nodeInfo in enumerate(dnservers):
+	# 	blockContents = f.read(blocksize)
+	# 	if i == len(dnservers)-1:
+	# 		blockContents+=f.read(extra)
+	# 		blocksize+=extra
 
+	# 	sp.BuildPutPacket(fname, blocksize)
+
+	for nodes in dnservers:
 		sp.BuildPutPacket(fname, blocksize)
+		request = communications(sp.getEncodedPacket(), nodes[0], nodes[1])
+		blocks.append((nodes[0], str(nodes[1]), request))
 
-		request = communications(sp.getEncodedPacket(), nodeInfo[0], nodeInfo[1])
 
-		if request == "OK":
-			blockID = communications(blockContents,nodeInfo[0], nodeInfo[1])
-
-		else:
-			print "A data node is down."
-			sys.exit(1)
-
-		blocks.append((nodeInfo, blockID))
 	# Notify the metadata server where the blocks are saved.
 
-	print blocks
+	sp.BuildDataBlockPacket(fname, blocks)
 
 	success = communications(sp.getEncodedPacket(), address[0], address[1])
 
-	if success:
+	if int(success):
 		print "YEY"
 	else:
 		print "BOOOO"

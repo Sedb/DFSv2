@@ -75,11 +75,8 @@ class DataNodeTCPHandler(SocketServer.BaseRequestHandler):
 		# Receive the data block.
 		# Send the block id back.
 		# Fill code
-		finfo=""
-		while len(finfo) < int(fsize):
-			finfo+=self.request.recv(1024)
-
-		f = open("%s/%s"%(DATA_PATH, blockid), 'w')
+		finfo = "Hi"
+		f = open("%s/%s.txt"%(DATA_PATH, blockid), 'w')
 		f.write(finfo)
 		f.close()
 		self.request.send(blockid)

@@ -87,7 +87,7 @@ class MetadataTCPHandler(SocketServer.BaseRequestHandler):
 		blocks = p.getDataBlocks()
 	
 		# Fill code to add blocks to file inode
-		self.request.sendall(db.AddBlockToInode(fname, blocks))
+		self.request.sendall(str(db.AddBlockToInode(fname, blocks)))
 
 
 
