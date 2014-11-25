@@ -34,8 +34,8 @@ def communications(command, IP, Port):
 	s.sendall(command)
 	response = s.recv(1024)
 
-	s.close()
-	return response
+
+	return response, s
 
 def copyToDFS(address, fname, path):
 	""" Contact the metadata server to ask to copu file fname,
@@ -92,26 +92,31 @@ def copyToDFS(address, fname, path):
 	blocks = []
 	f.seek(0)
 
-	for i, nodeInfo in enumerate(dnservers):
+	for i, nodes in enumerate(dnservers):
 		blockContents = f.read(blocksize)
 		if i == len(dnservers)-1:
 			blockContents+=f.read(extra)
 			blocksize+=extra
-		sp.BuildPutPacket(fname,fsize)
-		request = communications(sp.getEncodedPacket(), nodes[0], nodes[1])
-		blocks.append((nodes[0], str(nodes[1]), request))
+		sp.BuildPutPacket(fname, blocksize)
+		request, s = communications(sp.getEncodedPacket(), nodes[0], nodes[1])
 
-	# for nodes in dnservers:
-	# 	sp.BuildPutPacket(fname, blocksize)
-	# 	request = communications(sp.getEncodedPacket(), nodes[0], nodes[1])
-	# 	blocks.append((nodes[0], str(nodes[1]), request))
+		if request:
+			s.sendall(blockContents)
+
+		else:
+			print"Swiggitty swag, node is down! SHEEET!"
+
+		blocks.append((nodes[0], str(nodes[1]), request))
+		s.close()
 
 
 	# Notify the metadata server where the blocks are saved.
+	print blocks
 
 	sp.BuildDataBlockPacket(fname, blocks)
 
-	success = communications(sp.getEncodedPacket(), address[0], address[1])
+	success, s = communications(sp.getEncodedPacket(), address[0], address[1])
+	s.close()
 
 	if int(success):
 		print "YEY"

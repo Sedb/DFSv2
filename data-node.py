@@ -69,17 +69,21 @@ class DataNodeTCPHandler(SocketServer.BaseRequestHandler):
 
 		# Generates an unique block id.
 		blockid = str(uuid.uuid1())
-
+		self.request.send(blockid)
 
 		# Open the file for the new data block.  
 		# Receive the data block.
 		# Send the block id back.
 		# Fill code
-		finfo = "Hi"
+		finfo = self.request.recv(1024)
+		while len(finfo) < int(fsize):
+			finfo+=self.request.recv(1024)
+
+
 		f = open("%s/%s.txt"%(DATA_PATH, blockid), 'w')
 		f.write(finfo)
 		f.close()
-		self.request.send(blockid)
+
 
 
 	def handle_get(self, p):
