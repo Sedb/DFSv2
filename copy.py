@@ -71,7 +71,6 @@ def copyToDFS(address, fname, path):
 			sock.sendall(sp.getEncodedPacket())
 			response = sock.recv(1024)
 
-			print response
 			if response != "DUP":
 			 	sp.DecodePacket(response)
 			 	dnservers = sp.getDataNodes()
@@ -119,9 +118,10 @@ def copyToDFS(address, fname, path):
 	s.close()
 
 	if int(success):
-		print "YEY"
+		pass
 	else:
-		print "BOOOO"
+		print "An error ocurred while adding the blocks."
+		sys.exit(1)
 
 	f.close()
 
@@ -132,17 +132,48 @@ def copyFromDFS(address, fname, path):
 	    Saves the data in path.
 	"""
 
-   	# Contact the metadata server to ask for information of fname
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-	# Fill code
+	try:
+	    sock.connect((address[0], address[1]))
+	except socket.error, e:
+	    print "Could not connect with server.\n %s"%e
+	    sys.exit(1)
+	print "Connected to metadata server."
+
+   	# Contact the metadata server to ask for information of fname
+   	try:
+		sp = Packet()
+		sp.BuildGetPacket(fname)
+		sock.sendall(sp.getEncodedPacket())
+		response = sock.recv(1024)
+
+	 	sp.DecodePacket(response)
+
+	 	nodes = sp.getDataNodes()
+		if response == "NFOUND":
+			print "File not found."
+			sys.exit(1)
+	finally:
+		sock.close()
 
 	# If there is no error response Retreive the data blocks
 
-	# Fill code
+	f = open(path, 'w')
 
-    	# Save the file
-	
-	# Fill code
+	for i in nodes:
+		nodeHost, nodePort, blockID = i[0], i[1], i[2]
+		sp.BuildGetDataBlockPacket(blockID)
+		response, s = communications(sp.getEncodedPacket(), nodeHost, nodePort)
+		blocksize, blockContents = response.split('|', 1)
+		while len(blockContents) < int(blocksize):
+			blockContents += s.recv(1024)
+		
+		f.write(blockContents)
+
+	f.close()
+	s.close()
+
 
 if __name__ == "__main__":
 #	client("localhost", 8000)

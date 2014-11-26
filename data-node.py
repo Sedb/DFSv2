@@ -80,7 +80,7 @@ class DataNodeTCPHandler(SocketServer.BaseRequestHandler):
 			finfo+=self.request.recv(1024)
 
 
-		f = open("%s/%s.txt"%(DATA_PATH, blockid), 'w')
+		f = open("%s/%s"%(DATA_PATH, blockid), 'w')
 		f.write(finfo)
 		f.close()
 
@@ -94,12 +94,12 @@ class DataNodeTCPHandler(SocketServer.BaseRequestHandler):
 
 		# Read the file with the block id data
 		# Send it back to the copy client.
-		
-		# Fill code
 
 		f= open("%s/%s"%(DATA_PATH, blockid), 'r')
 		contents = f.read()
 		fsize = len(contents)
+
+		self.request.sendall('%s|%s'%(fsize, contents))
 
 	def handle(self):
 		msg = self.request.recv(1024)
