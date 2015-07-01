@@ -1,19 +1,18 @@
-# Assignment 04: Distributed File systems
-University of Puerto Rico at Rio Piedras<br>
-Department of Computer Science<br>
-CCOM4017: Operating Systems<br>
+# Distributed File System
 
 ## Introduction
 
-In this project the student will implement the main components of a file system by implementing a simple, yet functional, distributed file system (DFS).  The project will expand the student knowledge of the components of file systems (inodes, and data blocks), will develop the student skills in inter process communication, and will increase system security awereness on the students.  
+This project contains the source code for a distributed file system (DFS), the DFS is made up of a metadata server, several data nodes and its clients. If a file is stored in the DFS it will distribute the file among all it's available data nodes and when a file is read from the DFS it will recunstruct it from it's data nodes and write it on a destination of your choice.
 
-The components to implement are:
+## The components are:
+
 - A metadata server, which will function as a inodes repository
 - Data servers, that will serve as the disk space for file data blocks
 - list client, that will list the files available in the DFS
 - copy client, that will copy files from and to the DFS
 
 ## Objectives 
+
 - Study and implement a distributed file system
 - Get familiarized with File Management
 - Implementation of a distributed system
@@ -32,7 +31,46 @@ The components to implement are:
 * Optionally you may read about the json and sqlite3 libraries used in the 
 skeleton of the program.  
     * https://docs.python.org/2/library/json.html
-    * https://docs.python.org/2/library/sqlite3.html   
+    * https://docs.python.org/2/library/sqlite3.html 
+
+###Set Up
+Create Database:
+
+```
+python createdb.py
+```
+
+###Usage
+- Run the metadata server in the following manner:
+```
+python meta-data.py <port, default=8000> 
+```
+- Once the metadata server is up and running one can add datanodes to this server:
+
+```
+python data-node.py <server> <port> <datapath> <metadata port, default=8000>
+```
+- If running on a local machine the server is localhost the datapath is the directory where the data node will write the file chunks 
+
+- Once data nodes are connected to the metadata server and running, one can add files to the DFS and read files from it by using copy.py
+
+- This command will read from the DFS (Copy from DFS to computer):
+
+```
+python copy.py <server>:<port>:<dfs file path> <destination file>
+```
+- server and port stay the same. Path on the DFS has to be an existing file on the DFS and <destination file> is the path and the name where you wish to create the new file on your computer.
+
+- To know all the files that are currently in the DFS you can use the ls.py
+
+- This command will display a list of all the files on the DFS and displays them on your terminal:
+
+```
+python ls.py <server>:<port, default=8000>
+```
+- If running locally <server> will be localhost  
+
+##In-depth
 
 ### The metadadata server database manipulation functions.
 
@@ -105,22 +143,6 @@ In this project all packet objects have a packet type among the following option
 * BuildGetDataBlockPacket(blockid): Builds a get data block packet. Usefull when requesting a data block to a data node.
 * getBlockID(): Returns a the block_id from a packet.
 
-
-
-## Instructions
-
-Write and complete code for an unreliable and insecure distributed file server following the specifications bellow. 
-
-### Design specifications.
-
-For this project you will design and complete a distributed file system. You will write a DFS with tools to list the files, and to copy files from and to the DFS.  
-
-Your DFS will consist of:
-* A metadata server: which will containst the metadata (inode) information of the files in your file system.  It will also keep registry of the data servers that are connected to the DFS.
-* Data nodes: The data nodes will contain chunks (some blocks) of the file that you are storing in the DFS.
-* List command:  A command to list the files stored in the DFS.
-* Copy command:  A command that will copy files from and to the DFS. 
-
 ### The meta data server
 
 The meta data server containst the metadata (inode) information of the files in your file system.  It will also keep registry of the data servers that are connected to the DFS.
@@ -154,7 +176,7 @@ If no port is specified the port 8000 will be used by default.
 
 The data node is the process that receives and saves the data blocks of the files. It must first register with the metadata server as soon as it starts its execution. The data node receives the data from the clients when the client wants to write a file, and returns the data when the client wants to read a file.
 
-Your data node must provide the following services:
+The data node provides the following services:
 
 1. Listen to writes (puts):
     * The data node will receive blocks of data, store them using and unique id, and return the unique id.
@@ -169,7 +191,6 @@ python data-node.py &lt;server address&gt; &lt;port&gt; &lt;data path&gt; &lt;me
 
 Server address is the meta data server address, port is the data-node port number, data path is a path to a directory to store the data blocks, and metadata port is the optional metadata port if it was ran in a different port other than the default port.
 
-Note: Since you most probably do not have many different computers at your disposition, you may run more than one data-node in the same computer but the listening port and their data block directory must be different.
 
 ### The list client
 
@@ -193,7 +214,7 @@ Where server is the metadata server IP and port is the metadata server port.  If
 
 The copy client is more complicated than the list client.  It is in charge of copying the files from and to the DFS.
 
-The copy client must:
+The copy client:
 
 1. Write files in the DFS
     * The client must send to the metadata server the file name and size of the file to write.
@@ -227,25 +248,5 @@ The script createdb.py generates an empty database *dfs.db* for the project.
 <pre>
     python createdb.py
 </pre>
-
-## Deliverables
-
-* The source code of the programs (well documented)
-* A README file with:
-    * description of the programs, including a brief description of how they work.
-    * who helped you or discussed issues with you to finish the program.
-
-
-## Rubric
-
-- (10 pts) the programs run
-- (80 pts) quality of the working solutions
-    + (20 pts) Metadata server implemented correctly
-    + (25 pts) Data server implemented correctly
-    + (10 pts) List client implemented correctly
-    + (25 pts) Copy client implemented correctly
-- (10 pts) quality of the README
-    + (10 pts) description of the programs with their description.
-
 
 
